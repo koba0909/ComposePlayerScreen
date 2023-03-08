@@ -1,10 +1,7 @@
 package com.example.playerscreentest
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -30,15 +27,16 @@ fun PortraitPlayer() {
 
 @Composable
 fun PlayerScreen(modifier: Modifier = Modifier) {
-    Surface(
-        modifier = modifier
-            .background(Color.Blue),
-    ) { }
+    Box(
+        modifier = modifier.background(Color.Blue)
+    ) {
+
+    }
 }
 
 @Composable
 fun ChattingScreen(modifier: Modifier = Modifier) {
-    Surface(
+    Box(
         modifier = modifier
             .background(Color.Green),
     ) { }
