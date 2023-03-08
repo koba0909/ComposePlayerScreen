@@ -32,7 +32,9 @@ class ContainerFragment :
             )
             setContent {
                 MaterialTheme {
-                    ContainerScreen()
+                    ContainerScreen(
+                        containerViewModel = containerViewModel
+                    )
                 }
             }
         }
