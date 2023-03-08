@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.fragment.app.viewModels
 import com.example.playerscreentest.BaseDataBindingFragment
 import com.example.playerscreentest.ContainerScreen
 import com.example.playerscreentest.R
@@ -15,6 +16,9 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class ContainerFragment :
     BaseDataBindingFragment<FragmentContainerBinding>(R.layout.fragment_container) {
+
+    private val containerViewModel: ContainerViewModel by viewModels()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
