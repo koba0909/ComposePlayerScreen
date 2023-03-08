@@ -13,6 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun ContainerScreen() {
+    PortraitPlayer()
 }
 
 @Composable
