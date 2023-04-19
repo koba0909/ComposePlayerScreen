@@ -2,6 +2,13 @@ package com.example.playerscreentest.container
 
 import android.content.res.Configuration
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -12,18 +19,22 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.playerscreentest.container.domain.model.ChatUiType
 
 @Composable
 fun ContainerScreen(
@@ -50,7 +61,7 @@ fun ContainerScreen(
             onClickRotation = onClickRotation,
         )
     } else {
-        LandscapePlayer(
+        LandscapeChatRightPlayer(
             state = state.value,
             isPortrait = isPortrait,
             screenWidth = configuration.screenWidthDp,
@@ -89,8 +100,9 @@ fun PortraitPlayer(
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun LandscapePlayer(
+fun LandscapeChatRightPlayer(
     modifier: Modifier = Modifier,
     state: ContainerState,
     isPortrait: Boolean,
@@ -99,19 +111,33 @@ fun LandscapePlayer(
     onClickRotation: () -> Unit,
     onClickChatUiType: () -> Unit,
 ) {
+    val chatUiTransition = updateTransition(state.chatUiType, label = "chat ui state")
+
+    val chatWidth by chatUiTransition.animateDp(label = "chat width") {
+        if (it is ChatUiType.Right) {
+            260.dp
+        } else {
+            0.dp
+        }
+    }
+
+//    val playerRatio by chatUiTransition.animateFloat(label = "chat width") {
+//        if (it is ChatUiType.Right) {
+//            16 / 9f
+//        } else {
+//            1f
+//        }
+//    }
+
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val playerRatioModifier = if (screenWidth > screenHeight) {
-            Modifier.fillMaxWidth()
-        } else {
-            Modifier.fillMaxHeight()
-        }
 
         PlayerScreen(
-            modifier = playerRatioModifier
-                .weight(1f)
+            modifier = Modifier
+                .width(screenWidth.dp - chatWidth)
+                .fillMaxHeight()
                 .aspectRatio(16 / 9f),
             state = state,
             isPortrait = isPortrait,
@@ -121,7 +147,7 @@ fun LandscapePlayer(
 
         ChattingScreen(
             modifier = Modifier
-                .width(260.dp)
+                .width(chatWidth)
                 .fillMaxHeight(),
             state = state,
             onClickRotation = onClickRotation,
@@ -203,7 +229,7 @@ fun ChattingScreen(
 @Composable
 fun PortraitPreView() {
     PortraitPlayer(
-        state = ContainerState(ChatUiType.NONE),
+        state = ContainerState(ChatUiType.Right),
         isPortrait = true,
         onClickChatUiType = {},
         onClickRotation = {},
@@ -213,8 +239,8 @@ fun PortraitPreView() {
 @Preview(device = "spec:orientation=landscape,width=411dp,height=891dp")
 @Composable
 fun LandscapePreView() {
-    LandscapePlayer(
-        state = ContainerState(ChatUiType.NONE),
+    LandscapeChatRightPlayer(
+        state = ContainerState(ChatUiType.Right),
         isPortrait = false,
         screenWidth = 411,
         screenHeight = 891,

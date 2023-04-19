@@ -2,6 +2,8 @@ package com.example.playerscreentest.container
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.playerscreentest.container.domain.GetChatLineUseCase
+import com.example.playerscreentest.container.domain.model.ChatUiType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,17 +17,16 @@ data class ContainerState(
     val chatUiType: ChatUiType,
 )
 
-enum class ChatUiType {
-    NONE, RIGHT, BOTTOM_2, BOTTOM_4
-}
-
 sealed class ContainerEffect {
     object ToggleRotation: ContainerEffect()
 }
 
 @HiltViewModel
-class ContainerViewModel @Inject constructor() : ViewModel() {
-    private val _state = MutableStateFlow(ContainerState(ChatUiType.NONE))
+class ContainerViewModel @Inject constructor(
+    private val chatUiRepository: ChatUiRepository,
+    private val getChatLineUseCase: GetChatLineUseCase,
+) : ViewModel() {
+    private val _state = MutableStateFlow(ContainerState(ChatUiType.Right))
     val state = _state.asStateFlow()
 
     private val _effect = MutableSharedFlow<ContainerEffect>()
@@ -43,10 +44,10 @@ class ContainerViewModel @Inject constructor() : ViewModel() {
         _state.update {
             it.copy(
                 chatUiType = when (_state.value.chatUiType) {
-                    ChatUiType.RIGHT -> ChatUiType.BOTTOM_4
-                    ChatUiType.BOTTOM_4 -> ChatUiType.BOTTOM_2
-                    ChatUiType.BOTTOM_2 -> ChatUiType.NONE
-                    ChatUiType.NONE -> ChatUiType.RIGHT
+                    is ChatUiType.Right -> ChatUiType.Bottom(
+                        getChatLineUseCase()
+                    )
+                    is ChatUiType.Bottom -> ChatUiType.Right
                 }
             )
         }
