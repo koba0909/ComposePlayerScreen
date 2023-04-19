@@ -1,14 +1,17 @@
-package com.example.playerscreentest.comtainer
+package com.example.playerscreentest.container
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class ContainerState(
-    val isPortrait: Boolean,
     val chatUiType: ChatUiType,
 )
 
@@ -16,15 +19,22 @@ enum class ChatUiType {
     NONE, RIGHT, BOTTOM_2, BOTTOM_4
 }
 
+sealed class ContainerEffect {
+    object ToggleRotation: ContainerEffect()
+}
+
 @HiltViewModel
 class ContainerViewModel @Inject constructor() : ViewModel() {
-    private val _state = MutableStateFlow(ContainerState(true, ChatUiType.NONE))
+    private val _state = MutableStateFlow(ContainerState(ChatUiType.NONE))
     val state = _state.asStateFlow()
 
+    private val _effect = MutableSharedFlow<ContainerEffect>()
+    val effect = _effect.asSharedFlow()
+
     fun onToggleRotation() {
-        _state.update {
-            it.copy(
-                isPortrait = _state.value.isPortrait,
+        viewModelScope.launch {
+            _effect.emit(
+                ContainerEffect.ToggleRotation
             )
         }
     }

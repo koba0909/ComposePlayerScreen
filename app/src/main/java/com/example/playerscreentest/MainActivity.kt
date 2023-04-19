@@ -2,7 +2,7 @@ package com.example.playerscreentest
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.example.playerscreentest.comtainer.ContainerFragment
+import com.example.playerscreentest.container.ContainerFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

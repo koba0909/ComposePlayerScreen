@@ -1,25 +1,43 @@
-package com.example.playerscreentest
+package com.example.playerscreentest.container
 
+import android.content.res.Configuration
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.example.playerscreentest.comtainer.ContainerState
-import com.example.playerscreentest.comtainer.ContainerViewModel
 
 @Composable
 fun ContainerScreen(
     containerViewModel: ContainerViewModel,
 ) {
     val state = containerViewModel.state.collectAsState()
+    val configuration = LocalConfiguration.current
+    val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+
     val onClickRotation: () -> Unit = {
         containerViewModel.onToggleRotation()
     }
@@ -27,16 +45,21 @@ fun ContainerScreen(
         containerViewModel.nextChatUiType()
     }
 
-    Log.d("hugh", "isPortrait : ${state.value.isPortrait}")
-    if (state.value.isPortrait) {
+    Log.d("hugh", "isPortrait : ${isPortrait}")
+
+    if (isPortrait) {
         PortraitPlayer(
             state = state.value,
+            isPortrait = isPortrait,
             onClickChatUiType = onClickChatUi,
             onClickRotation = onClickRotation,
         )
     } else {
         LandscapePlayer(
             state = state.value,
+            isPortrait = isPortrait,
+            screenWidth = configuration.screenWidthDp,
+            screenHeight = configuration.screenHeightDp,
             onClickChatUiType = onClickChatUi,
             onClickRotation = onClickRotation,
         )
@@ -47,14 +70,17 @@ fun ContainerScreen(
 fun PortraitPlayer(
     modifier: Modifier = Modifier,
     state: ContainerState,
+    isPortrait: Boolean,
     onClickRotation: () -> Unit,
     onClickChatUiType: () -> Unit,
 ) {
     Column {
         PlayerScreen(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .aspectRatio(16 / 9f),
             state = state,
+            isPortrait = isPortrait,
             onClickRotation = onClickRotation,
             onClickChatUiType = onClickChatUiType,
         )
@@ -72,20 +98,35 @@ fun PortraitPlayer(
 fun LandscapePlayer(
     modifier: Modifier = Modifier,
     state: ContainerState,
+    isPortrait: Boolean,
+    screenWidth: Int,
+    screenHeight: Int,
     onClickRotation: () -> Unit,
     onClickChatUiType: () -> Unit,
 ) {
-    Row {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val playerRatioModifier = if (screenWidth > screenHeight) {
+            Modifier.fillMaxWidth()
+        } else {
+            Modifier.fillMaxHeight()
+        }
+
         PlayerScreen(
-            modifier = Modifier.fillMaxHeight()
+            modifier = playerRatioModifier
+                .weight(1f)
                 .aspectRatio(16 / 9f),
             state = state,
+            isPortrait = isPortrait,
             onClickRotation = onClickRotation,
             onClickChatUiType = onClickChatUiType,
         )
 
         ChattingScreen(
-            modifier = Modifier.width(100.dp)
+            modifier = Modifier
+                .width(260.dp)
                 .fillMaxHeight(),
             state = state,
             onClickRotation = onClickRotation,
@@ -98,6 +139,7 @@ fun LandscapePlayer(
 fun PlayerScreen(
     modifier: Modifier = Modifier,
     state: ContainerState,
+    isPortrait: Boolean,
     onClickRotation: () -> Unit,
     onClickChatUiType: () -> Unit,
 ) {
@@ -107,6 +149,7 @@ fun PlayerScreen(
         PlayerController(
             modifier = Modifier.align(Alignment.BottomEnd),
             state = state,
+            isPortrait = isPortrait,
             onClickRotation = onClickRotation,
             onClickChatUiType = onClickChatUiType,
         )
@@ -117,12 +160,14 @@ fun PlayerScreen(
 fun PlayerController(
     modifier: Modifier = Modifier,
     state: ContainerState,
+    isPortrait: Boolean,
     onClickRotation: () -> Unit,
     onClickChatUiType: () -> Unit,
 ) {
     Row(modifier = modifier) {
         Text(
-            modifier = Modifier.wrapContentSize()
+            modifier = Modifier
+                .wrapContentSize()
                 .background(Color.Gray)
                 .clickable {
                     onClickRotation.invoke()
@@ -132,9 +177,10 @@ fun PlayerController(
 
         Spacer(modifier = Modifier.size(10.dp))
 
-        if (!state.isPortrait) {
+        if (!isPortrait) {
             Text(
-                modifier = Modifier.wrapContentSize()
+                modifier = Modifier
+                    .wrapContentSize()
                     .background(Color.Gray)
                     .clickable {
                         onClickChatUiType.invoke()
@@ -158,14 +204,26 @@ fun ChattingScreen(
     ) { }
 }
 
-@Preview(device = "spec:orientation=portrait")
+@Preview(device = "spec:orientation=portrait,width=411dp,height=891dp")
 @Composable
 fun PortraitPreView() {
-//    ContainerScreen()
+    PortraitPlayer(
+        state = ContainerState(ChatUiType.NONE),
+        isPortrait = true,
+        onClickChatUiType = {},
+        onClickRotation = {},
+    )
 }
 
-@Preview(device = "spec:orientation=landscape")
+@Preview(device = "spec:orientation=landscape,width=411dp,height=891dp")
 @Composable
 fun LandscapePreView() {
-//    ContainerScreen()
+    LandscapePlayer(
+        state = ContainerState(ChatUiType.NONE),
+        isPortrait = false,
+        screenWidth = 411,
+        screenHeight = 891,
+        onClickChatUiType = {},
+        onClickRotation = {},
+    )
 }
