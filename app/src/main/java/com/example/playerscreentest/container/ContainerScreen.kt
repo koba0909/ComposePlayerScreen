@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -121,14 +122,6 @@ fun LandscapeChatRightPlayer(
         }
     }
 
-//    val playerRatio by chatUiTransition.animateFloat(label = "chat width") {
-//        if (it is ChatUiType.Right) {
-//            16 / 9f
-//        } else {
-//            1f
-//        }
-//    }
-
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
@@ -136,9 +129,9 @@ fun LandscapeChatRightPlayer(
 
         PlayerScreen(
             modifier = Modifier
-                .width(screenWidth.dp - chatWidth)
-                .fillMaxHeight()
-                .aspectRatio(16 / 9f),
+                .weight(1f)
+                .aspectRatio(16 / 9f)
+                .heightIn(max = screenHeight.dp),
             state = state,
             isPortrait = isPortrait,
             onClickRotation = onClickRotation,
