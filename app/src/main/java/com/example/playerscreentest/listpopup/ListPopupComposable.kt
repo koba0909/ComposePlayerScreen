@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,6 +22,7 @@ import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.ParentDataModifier
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
@@ -35,23 +37,29 @@ import kotlin.math.roundToInt
 fun ListPopupComposable(
     modifier: Modifier = Modifier,
     topComposable: @Composable (Modifier) -> Unit,
-    bottomComposable: @Composable () -> Unit
+    bottomComposable: @Composable (Modifier) -> Unit
 ) {
     var offsetY by remember { mutableStateOf(0f) }
     var topHeight by remember { mutableStateOf(0) }
+    var columnWidth by remember { mutableStateOf(0) }
+    var isMinimize by remember { mutableStateOf(false) }
 
     val topComposableModifier = Modifier
+        .width(
+            width = if (isMinimize) {
+                (columnWidth / 2).dp
+            } else {
+                columnWidth.dp
+            }
+        )
         .pointerInput(Unit) {
             detectDragGestures(
-                onDragCancel = {
-                    Log.d("hugh", "onDragCancel")
-                },
                 onDragEnd = {
-                    offsetY = if (offsetY > topHeight / 3) {
-                        Log.d("hugh","minimize")
-                        offsetY
+                    if (offsetY > topHeight / 3) {
+                        // minimize
+                        isMinimize = true
                     } else {
-                        0f
+                        offsetY = 0f
                     }
                 }
             ) { change, dragAmount ->
@@ -59,7 +67,9 @@ fun ListPopupComposable(
                 offsetY += dragAmount.y
             }
         }
-        .onGloballyPositioned { topHeight = it.size.height }
+        .onSizeChanged { topHeight = it.height }
+
+    val bottomComposableModifier = Modifier
 
     Column(
         modifier
@@ -69,9 +79,13 @@ fun ListPopupComposable(
                     offsetY.roundToInt()
                 )
             }
+            .onSizeChanged {
+                columnWidth = it.width
+                Log.d("hugh", "column width : $columnWidth")
+            }
     ) {
         topComposable(topComposableModifier)
-        bottomComposable()
+        bottomComposable(bottomComposableModifier)
     }
 }
 
@@ -89,7 +103,6 @@ fun ListPopupPreview() {
         topComposable = {
             PlayerScreen(
                 modifier = it
-                    .fillMaxWidth()
                     .aspectRatio(16 / 9f),
                 state = state,
                 isPortrait = true,
@@ -100,7 +113,7 @@ fun ListPopupPreview() {
 
         bottomComposable = {
             ChattingScreen(
-                modifier = Modifier.fillMaxSize(),
+                modifier = it.fillMaxSize(),
                 state = state,
                 onClickRotation = onClickRotation,
                 onClickChatUiType = onClickChatUiType,
