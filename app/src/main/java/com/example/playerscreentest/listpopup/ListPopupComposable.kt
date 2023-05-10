@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,14 +44,22 @@ fun ListPopupComposable(
     var topHeight by remember { mutableStateOf(0) }
     var columnWidth by remember { mutableStateOf(0) }
     var isMinimize by remember { mutableStateOf(false) }
-
-    val topComposableModifier = Modifier
-        .width(
-            width = if (isMinimize) {
+    val topWidth by remember {
+        derivedStateOf {
+            if (isMinimize) {
                 (columnWidth / 2).dp
             } else {
                 columnWidth.dp
             }
+        }
+    }
+
+    Log.d("hugh", "isMinimize:  $isMinimize")
+    Log.d("hugh", "topWidth:  $topWidth")
+
+    val topComposableModifier = Modifier
+        .width(
+            width = topWidth
         )
         .pointerInput(Unit) {
             detectDragGestures(
@@ -60,6 +69,7 @@ fun ListPopupComposable(
                         isMinimize = true
                     } else {
                         offsetY = 0f
+                        isMinimize = false
                     }
                 }
             ) { change, dragAmount ->
@@ -84,7 +94,7 @@ fun ListPopupComposable(
                 Log.d("hugh", "column width : $columnWidth")
             }
     ) {
-        topComposable(topComposableModifier)
+        topComposable(Modifier)
         bottomComposable(bottomComposableModifier)
     }
 }
@@ -103,7 +113,7 @@ fun ListPopupPreview() {
         topComposable = {
             PlayerScreen(
                 modifier = it
-                    .aspectRatio(16 / 9f),
+                    .width(540.dp),
                 state = state,
                 isPortrait = true,
                 onClickRotation = onClickRotation,

@@ -2,6 +2,7 @@ package com.example.playerscreentest.container
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.playerscreentest.container.data.ChatUiRepository
 import com.example.playerscreentest.container.domain.GetChatLineUseCase
 import com.example.playerscreentest.container.domain.model.ChatUiType
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,6 +32,14 @@ class ContainerViewModel @Inject constructor(
 
     private val _effect = MutableSharedFlow<ContainerEffect>()
     val effect = _effect.asSharedFlow()
+
+    var layoutStatea = LayoutState.PORTRAIT
+
+    fun setLayoutState(layoutState: LayoutState) {
+        this.layoutStatea = layoutState
+    }
+
+    fun getLayoutState() = layoutStatea
 
     fun onToggleRotation() {
         viewModelScope.launch {

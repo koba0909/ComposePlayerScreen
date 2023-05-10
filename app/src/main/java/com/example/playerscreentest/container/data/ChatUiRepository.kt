@@ -1,4 +1,4 @@
-package com.example.playerscreentest.container
+package com.example.playerscreentest.container.data
 
 import javax.inject.Inject
 

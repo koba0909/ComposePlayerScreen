@@ -1,6 +1,6 @@
 package com.example.playerscreentest.container.domain
 
-import com.example.playerscreentest.container.ChatUiRepository
+import com.example.playerscreentest.container.data.ChatUiRepository
 import com.example.playerscreentest.container.domain.model.BottomChatLine
 import javax.inject.Inject
 
